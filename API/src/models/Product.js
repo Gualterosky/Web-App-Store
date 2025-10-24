@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Product = sequelize.define('Product', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   nombre: {
     type: DataTypes.STRING,
     allowNull: false
@@ -11,17 +16,30 @@ const Product = sequelize.define('Product', {
     allowNull: true
   },
   precio: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-    defaultValue: 0.0
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  categoria: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  marca: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
   stock: {
     type: DataTypes.INTEGER,
-    allowNull: false,
     defaultValue: 0
+  },
+  imagen: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  especificaciones: {
+    type: DataTypes.JSON,
+    allowNull: true
   }
 }, {
-  tableName: 'products',
   timestamps: true
 });
 
