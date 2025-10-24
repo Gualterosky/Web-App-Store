@@ -6,3 +6,5 @@ id,nombre,correo,password,createdAt,updatedAt
 6,Sofía Rojas,sofia.rojas@example.com,123456,2025-10-20T22:55:00.408Z,2025-10-20T22:55:00.408Z
 7,Kevin López,kevin@example.com,123456,2025-10-21T22:39:48.890Z,2025-10-21T22:39:48.890Z
 8,Admin,admin@example.com,admin123,2025-10-23T00:29:26.160Z,2025-10-23T00:29:26.160Z
+juan@test.com,12345678
+kevinleonardogm01@gmail.com,Kl12345678
