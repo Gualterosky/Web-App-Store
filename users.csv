@@ -1,0 +1,8 @@
+id,nombre,correo,password,createdAt,updatedAt
+2,Ana Torres,ana.torres@example.com,123456,2025-10-20T22:54:30.966Z,2025-10-20T22:54:30.966Z
+3,Carlos G.,carlos.g@example.com,123456,2025-10-20T22:54:42.804Z,2025-10-20T22:58:29.991Z
+4,Luisa Martínez,luisa.martinez@example.com,123456,2025-10-20T22:54:49.095Z,2025-10-20T22:54:49.095Z
+5,Daniel Pérez,daniel.perez@example.com,123456,2025-10-20T22:54:54.772Z,2025-10-20T22:54:54.772Z
+6,Sofía Rojas,sofia.rojas@example.com,123456,2025-10-20T22:55:00.408Z,2025-10-20T22:55:00.408Z
+7,Kevin López,kevin@example.com,123456,2025-10-21T22:39:48.890Z,2025-10-21T22:39:48.890Z
+8,Admin,admin@example.com,admin123,2025-10-23T00:29:26.160Z,2025-10-23T00:29:26.160Z

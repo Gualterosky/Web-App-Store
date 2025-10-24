@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo PC - Catálogo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container container">
+            <div class="logo">
+                Mundo Pc 
+                <img src="Logo.png" alt="Mundo Pc">
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="Index.html">Inicio</a></li>
+                    <li><a href="Productos.html">Productos</a></li>
+                    <li><a href="Carrito.html" class="cart">Carrito <span class="cart-icon" style="font-size: 1.5em; color: white; filter: brightness(0) invert(1); margin-left: 8px;">🛒</span></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="containerproduct">
+        <aside class="sidebar">
+            <h2 class="filter-title">Filtrar productos:</h2>
+            
+            <div class="filter-section">
+                <h3>Categorías</h3>
+                <div id="categoryFilters"></div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Precio</h3>
+                <div class="filter-option">
+                    <input type="checkbox" id="precio-range" value="0-1000000">
+                    <label for="precio-range">$0 - $1.000.000</label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Marca</h3>
+                <div id="brandFilters"></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <div class="filter-dropdown">
+                    <div class="dropdown-btn">Filtrar</div>
+                </div>
+                <div class="price-filter">
+                    <input type="checkbox" id="price-filter-top">
+                    <label for="price-filter-top">$ 0 - $ 1.000.000</label>
+                </div>
+            </div>
+
+            <div id="loadingMessage" style="text-align: center; padding: 40px; font-size: 18px;">
+                Cargando productos...
+            </div>
+
+            <div id="errorMessage" style="display: none; text-align: center; padding: 40px; color: #e74c3c;">
+                Error al cargar los productos. Por favor, intenta de nuevo.
+            </div>
+
+            <div id="productsContainer" style="display: none;">
+                <div class="products-grid" id="productsGrid"></div>
+
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </main>
+    </div>
+
+   <script>
+  const API_URL = "http://localhost:3000/api/products";
+  let allProducts = [];
+  let filteredProducts = [];
+  let currentPage = 1;
+  const productsPerPage = 4;
+
+  // 🔹 Cargar productos desde el backend
+  async function loadProducts() {
+    try {
+      // Mostrar mensaje de carga
+      document.getElementById("loadingMessage").style.display = "block";
+      document.getElementById("productsContainer").style.display = "none";
+      document.getElementById("errorMessage").style.display = "none";
+
+      // Llamar API
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Error HTTP " + response.status);
+
+      const data = await response.json();
+      allProducts = data;
+      filteredProducts = [...allProducts];
+
+      // Mostrar productos
+      document.getElementById("loadingMessage").style.display = "none";
+      document.getElementById("productsContainer").style.display = "block";
+      renderProducts();
+    } catch (error) {
+      console.error("❌ Error al cargar productos:", error);
+      document.getElementById("loadingMessage").style.display = "none";
+      document.getElementById("errorMessage").style.display = "block";
+    }
+  }
+
+  // 🔹 Formato de precios
+  function formatPrice(price) {
+    return "$" + price.toLocaleString("es-CO");
+  }
+
+  // 🔹 Renderizar productos
+  function renderProducts() {
+    const grid = document.getElementById("productsGrid");
+    if (!grid) {
+      console.error("⚠️ No se encontró el contenedor #productsGrid");
+      return;
+    }
+
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+    grid.innerHTML = currentProducts
+      .map(
+        (p) => `
+        <div class="producto">
+          <div class="product-image">🖥️</div>
+          <h3 class="product-name">${p.nombre}</h3>
+          <p>${p.descripcion}</p>
+          <div class="product-price">${formatPrice(p.precio)}</div>
+          <button class="add-to-cart" onclick="addToCart(${p.id}, event)">
+            Agregar al carrito
+          </button>
+        </div>`
+      )
+      .join("");
+
+    updatePagination();
+  }
+
+  // 🔹 Actualizar paginación
+  function updatePagination() {
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+    const pagination = document.getElementById("pagination");
+    if (!pagination) return;
+
+    pagination.innerHTML = `
+      <button id="prevPage" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>
+      <span id="pageInfo">Página ${currentPage} de ${totalPages}</span>
+      <button id="nextPage" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button>
+    `;
+
+    document.getElementById("prevPage").onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderProducts();
+      }
+    };
+    document.getElementById("nextPage").onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderProducts();
+      }
+    };
+  }
+
+  // 🔹 Filtros
+  function filterProducts() {
+    const categoryFilters = Array.from(
+      document.querySelectorAll(
+        'input[value="escritorio"], input[value="portatil"], input[value="perifericos"]'
+      )
+    )
+      .filter((i) => i.checked)
+      .map((i) => i.value);
+
+    const brandFilters = Array.from(
+      document.querySelectorAll('input[value="asus"], input[value="amd"]')
+    )
+      .filter((i) => i.checked)
+      .map((i) => i.value);
+
+    const priceFilter = document.querySelector(
+      'input[value="0-1000000"]'
+    )?.checked;
+
+    filteredProducts = allProducts.filter((p) => {
+      const categoryMatch =
+        categoryFilters.length === 0 ||
+        categoryFilters.some((cat) =>
+          p.descripcion?.toLowerCase().includes(cat)
+        );
+      const brandMatch =
+        brandFilters.length === 0 ||
+        brandFilters.some((b) => p.nombre?.toLowerCase().includes(b));
+      const priceMatch = !priceFilter || p.precio <= 1000000;
+
+      return categoryMatch && brandMatch && priceMatch;
+    });
+
+    currentPage = 1;
+    renderProducts();
+  }
+
+  // 🔹 Agregar al carrito
+  function addToCart(productId, event) {
+    const product = allProducts.find((p) => p.id === productId);
+    if (!product) return;
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push(product);
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    const button = event.target;
+    button.textContent = "Agregado!";
+    button.disabled = true;
+    setTimeout(() => {
+      button.textContent = "Agregar al carrito";
+      button.disabled = false;
+    }, 1000);
+  }
+
+  // 🔹 Inicialización
+  document.addEventListener("DOMContentLoaded", function () {
+    const filterInputs = document.querySelectorAll(
+      '.filter-option input[type="checkbox"]'
+    );
+    filterInputs.forEach((input) => {
+      input.addEventListener("change", filterProducts);
+    });
+
+    const topPriceFilter = document.getElementById("price-filter-top");
+    const sidebarPriceFilter = document.querySelector(
+      'input[value="0-1000000"]'
+    );
+    if (topPriceFilter && sidebarPriceFilter) {
+      topPriceFilter.addEventListener("change", function () {
+        sidebarPriceFilter.checked = this.checked;
+        filterProducts();
+      });
+    }
+
+    loadProducts();
+  });
+</script>
+
+
+</body>
+</html>
