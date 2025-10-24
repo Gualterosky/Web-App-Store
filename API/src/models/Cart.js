@@ -12,31 +12,38 @@ const Cart = sequelize.define('Cart', {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'user_id',
     references: {
-      model: User,
+      model: 'Users',
       key: 'id'
     }
   },
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'product_id',
     references: {
-      model: Product,
+      model: 'products',
       key: 'id'
     }
   },
   quantity: {
     type: DataTypes.INTEGER,
     defaultValue: 1,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      min: 1
+    }
   }
 }, {
+  tableName: 'carts',
   timestamps: true
 });
 
 // Relaciones
-Cart.belongsTo(User, { foreignKey: 'userId' });
-Cart.belongsTo(Product, { foreignKey: 'productId' });
+Cart.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Cart.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
 User.hasMany(Cart, { foreignKey: 'userId' });
 Product.hasMany(Cart, { foreignKey: 'productId' });
 
