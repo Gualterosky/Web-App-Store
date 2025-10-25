@@ -18,6 +18,7 @@
                     <li><a href="Index.html">Inicio</a></li>
                     <li><a href="Productos.html">Productos</a></li>
                     <li><a href="Carrito.html" class="cart">Carrito <span class="cart-icon" style="font-size: 1.5em; color: white; filter: brightness(0) invert(1); margin-left: 8px;">🛒</span></a></li>
+                    <li id="authLink"><a href="login.html" style="color: #fff;">Iniciar Sesión</a></li>
                 </ul>
             </nav>
         </div>
@@ -29,7 +30,24 @@
             
             <div class="filter-section">
                 <h3>Categorías</h3>
-                <div id="categoryFilters"></div>
+                <div id="categoryFilters">
+                    <div class="filter-option">
+                        <input type="checkbox" id="cat-escritorio" value="escritorio">
+                        <label for="cat-escritorio">Escritorio</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="cat-portatil" value="portatil">
+                        <label for="cat-portatil">Portátil</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="cat-componentes" value="componentes">
+                        <label for="cat-componentes">Componentes</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="cat-perifericos" value="perifericos">
+                        <label for="cat-perifericos">Periféricos</label>
+                    </div>
+                </div>
             </div>
 
             <div class="filter-section">
@@ -38,289 +56,301 @@
                     <input type="checkbox" id="precio-range" value="0-1000000">
                     <label for="precio-range">$0 - $1.000.000</label>
                 </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="precio-range-2" value="1000000-3000000">
+                    <label for="precio-range-2">$1.000.000 - $3.000.000</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="precio-range-3" value="3000000-999999999">
+                    <label for="precio-range-3">Más de $3.000.000</label>
+                </div>
             </div>
 
             <div class="filter-section">
                 <h3>Marca</h3>
-                <div id="brandFilters"></div>
+                <div id="brandFilters">
+                    <div class="filter-option">
+                        <input type="checkbox" id="marca-asus" value="asus">
+                        <label for="marca-asus">ASUS</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="marca-amd" value="amd">
+                        <label for="marca-amd">AMD</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="marca-intel" value="intel">
+                        <label for="marca-intel">Intel</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="marca-dell" value="dell">
+                        <label for="marca-dell">Dell</label>
+                    </div>
+                </div>
             </div>
         </aside>
 
         <main class="main-content">
             <div class="content-header">
-                <div class="filter-dropdown">
-                    <div class="dropdown-btn">Filtrar</div>
-                </div>
+                <h2 style="color: #333; font-size: 24px;">Catálogo de Productos</h2>
                 <div class="price-filter">
                     <input type="checkbox" id="price-filter-top">
                     <label for="price-filter-top">$ 0 - $ 1.000.000</label>
                 </div>
             </div>
 
-            <div id="loadingMessage" style="text-align: center; padding: 40px; font-size: 18px;">
-                Cargando productos...
+            <div id="loadingMessage" style="text-align: center; padding: 40px; font-size: 18px; color: #666;">
+                🔄 Cargando productos...
             </div>
 
             <div id="errorMessage" style="display: none; text-align: center; padding: 40px; color: #e74c3c;">
-                Error al cargar los productos. Por favor, intenta de nuevo.
+                <h3>⚠️ Error al cargar productos</h3>
+                <p id="errorText"></p>
+                <button onclick="loadProducts()" style="margin-top: 20px; padding: 12px 24px; background: #2980b9; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    🔄 Reintentar
+                </button>
             </div>
 
             <div id="productsContainer" style="display: none;">
                 <div class="products-grid" id="productsGrid"></div>
-
                 <div class="pagination" id="pagination"></div>
             </div>
         </main>
     </div>
 
-   <script>
-  const API_URL = "http://localhost:3000/api/products";
-  let allProducts = [];
-  let filteredProducts = [];
-  let currentPage = 1;
-  const productsPerPage = 4;
+    <script>
+        const API_URL = "http://localhost:3000/api/products";
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const productsPerPage = 8;
 
-  // 🔹 Cargar productos desde el backend
-  async function loadProducts() {
-    try {
-      // Mostrar mensaje de carga
-      document.getElementById("loadingMessage").style.display = "block";
-      document.getElementById("productsContainer").style.display = "none";
-      document.getElementById("errorMessage").style.display = "none";
+        function isAuthenticated() {
+            return !!localStorage.getItem('authToken');
+        }
 
-      // Llamar API
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Error HTTP " + response.status);
+        function getAuthToken() {
+            return localStorage.getItem('authToken');
+        }
 
-      const data = await response.json();
-      allProducts = data;
-      filteredProducts = [...allProducts];
+        function updateAuthUI() {
+            const authLink = document.getElementById('authLink');
+            if (isAuthenticated()) {
+                authLink.innerHTML = '<a href="#" onclick="logout()" style="color: #fff;">Cerrar Sesión</a>';
+            } else {
+                authLink.innerHTML = '<a href="login.html" style="color: #fff;">Iniciar Sesión</a>';
+            }
+        }
 
-      // Mostrar productos
-      document.getElementById("loadingMessage").style.display = "none";
-      document.getElementById("productsContainer").style.display = "block";
-      renderProducts();
-    } catch (error) {
-      console.error("❌ Error al cargar productos:", error);
-      document.getElementById("loadingMessage").style.display = "none";
-      document.getElementById("errorMessage").style.display = "block";
-    }
-  }
+        async function loadProducts() {
+            try {
+                console.log('🔄 Cargando productos desde:', API_URL);
+                
+                document.getElementById("loadingMessage").style.display = "block";
+                document.getElementById("productsContainer").style.display = "none";
+                document.getElementById("errorMessage").style.display = "none";
 
-  // 🔹 Formato de precios
-  function formatPrice(price) {
-    return "$" + price.toLocaleString("es-CO");
-  }
+                const response = await fetch(API_URL);
+                console.log('📡 Respuesta recibida:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP ${response.status}`);
+                }
 
-  // 🔹 Renderizar productos
-  function renderProducts() {
-    const grid = document.getElementById("productsGrid");
-    if (!grid) {
-      console.error("⚠️ No se encontró el contenedor #productsGrid");
-      return;
-    }
+                const data = await response.json();
+                console.log('📦 Productos recibidos:', data.length, 'productos');
+                
+                if (!data || data.length === 0) {
+                    throw new Error("No hay productos en el catálogo");
+                }
 
-    const startIndex = (currentPage - 1) * productsPerPage;
-    const endIndex = startIndex + productsPerPage;
-    const currentProducts = filteredProducts.slice(startIndex, endIndex);
+                allProducts = data;
+                filteredProducts = [...allProducts];
 
-    grid.innerHTML = currentProducts
-      .map(
-        (p) => `
-        <div class="producto">
-          <div class="product-image">🖥️</div>
-          <h3 class="product-name">${p.nombre}</h3>
-          <p>${p.descripcion}</p>
-          <div class="product-price">${formatPrice(p.precio)}</div>
-          <button class="add-to-cart" onclick="addToCart(${p.id}, event)">
-            Agregar al carrito
-          </button>
-        </div>`
-      )
-      .join("");
+                document.getElementById("loadingMessage").style.display = "none";
+                document.getElementById("productsContainer").style.display = "block";
+                renderProducts();
+                
+            } catch (error) {
+                console.error("❌ Error:", error);
+                document.getElementById("loadingMessage").style.display = "none";
+                document.getElementById("errorMessage").style.display = "block";
+                document.getElementById("errorText").textContent = error.message;
+            }
+        }
 
-    updatePagination();
-  }
+        function formatPrice(price) {
+            return "$" + Math.round(price).toLocaleString("es-CO");
+        }
 
-  // 🔹 Actualizar paginación
-  function updatePagination() {
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-    const pagination = document.getElementById("pagination");
-    if (!pagination) return;
+        function getCategoryEmoji(categoria) {
+            const emojis = {
+                'escritorio': '🖥️',
+                'portatil': '💻',
+                'perifericos': '⌨️',
+                'componentes': '🔧'
+            };
+            return emojis[categoria?.toLowerCase()] || '💻';
+        }
 
-    pagination.innerHTML = `
-      <button id="prevPage" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>
-      <span id="pageInfo">Página ${currentPage} de ${totalPages}</span>
-      <button id="nextPage" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button>
-    `;
+        function renderProducts() {
+            const grid = document.getElementById("productsGrid");
+            const startIndex = (currentPage - 1) * productsPerPage;
+            const endIndex = startIndex + productsPerPage;
+            const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
-    document.getElementById("prevPage").onclick = () => {
-      if (currentPage > 1) {
-        currentPage--;
-        renderProducts();
-      }
-    };
-    document.getElementById("nextPage").onclick = () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderProducts();
-      }
-    };
-  }
+            if (currentProducts.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;"><h3>No se encontraron productos</h3></div>';
+                return;
+            }
 
-  // 🔹 Filtros
-  function filterProducts() {
-    const categoryFilters = Array.from(
-      document.querySelectorAll(
-        'input[value="escritorio"], input[value="portatil"], input[value="perifericos"]'
-      )
-    )
-      .filter((i) => i.checked)
-      .map((i) => i.value);
+            grid.innerHTML = currentProducts.map(p => `
+                <div class="producto" style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <div style="font-size: 60px; height: 120px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 10px; margin-bottom: 15px;">
+                        ${getCategoryEmoji(p.categoria)}
+                    </div>
+                    <h3 style="font-size: 18px; color: #333; margin-bottom: 10px; min-height: 44px;">${p.nombre}</h3>
+                    <p style="color: #666; font-size: 14px; min-height: 60px; margin-bottom: 15px;">${(p.descripcion || '').substring(0, 80)}...</p>
+                    <div style="font-size: 24px; color: #2980b9; font-weight: bold; margin-bottom: 15px;">${formatPrice(p.precio)}</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="viewProductDetails(${p.id})" style="flex: 1; background: #ecf0f1; color: #2c3e50; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">Ver detalles</button>
+                        <button onclick="addToCart(${p.id}, event)" style="flex: 2; background: linear-gradient(135deg, #4a90e2, #2980b9); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">Agregar al carrito</button>
+                    </div>
+                </div>
+            `).join("");
 
-    const brandFilters = Array.from(
-      document.querySelectorAll('input[value="asus"], input[value="amd"]')
-    )
-      .filter((i) => i.checked)
-      .map((i) => i.value);
+            updatePagination();
+        }
 
-    const priceFilter = document.querySelector(
-      'input[value="0-1000000"]'
-    )?.checked;
+        function viewProductDetails(productId) {
+            window.location.href = `producto-detalle.html?id=${productId}`;
+        }
 
-    filteredProducts = allProducts.filter((p) => {
-      const categoryMatch =
-        categoryFilters.length === 0 ||
-        categoryFilters.some((cat) =>
-          p.descripcion?.toLowerCase().includes(cat)
-        );
-      const brandMatch =
-        brandFilters.length === 0 ||
-        brandFilters.some((b) => p.nombre?.toLowerCase().includes(b));
-      const priceMatch = !priceFilter || p.precio <= 1000000;
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+            const pagination = document.getElementById("pagination");
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
 
-      return categoryMatch && brandMatch && priceMatch;
-    });
+            pagination.style.display = 'flex';
+            pagination.innerHTML = `
+                <button id="prevPage" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>
+                <span>Página ${currentPage} de ${totalPages}</span>
+                <button id="nextPage" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button>
+            `;
 
-    currentPage = 1;
-    renderProducts();
-  }
+            document.getElementById("prevPage").onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderProducts();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            
+            document.getElementById("nextPage").onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderProducts();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+        }
 
-  // 🔹 Agregar al carrito
-  function addToCart(productId, event) {
-    const product = allProducts.find((p) => p.id === productId);
-    if (!product) return;
+        function filterProducts() {
+            const categoryFilters = Array.from(document.querySelectorAll('#categoryFilters input:checked')).map(i => i.value);
+            const brandFilters = Array.from(document.querySelectorAll('#brandFilters input:checked')).map(i => i.value);
+            const priceFilters = Array.from(document.querySelectorAll('.filter-section input[value*="-"]:checked')).map(i => {
+                const [min, max] = i.value.split('-').map(Number);
+                return { min, max };
+            });
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart.push(product);
-    localStorage.setItem("cart", JSON.stringify(cart));
+            filteredProducts = allProducts.filter(p => {
+                const categoryMatch = categoryFilters.length === 0 || categoryFilters.some(cat => (p.categoria || '').toLowerCase().includes(cat));
+                const brandMatch = brandFilters.length === 0 || brandFilters.some(b => (p.marca || p.nombre || '').toLowerCase().includes(b));
+                const priceMatch = priceFilters.length === 0 || priceFilters.some(range => p.precio >= range.min && p.precio <= range.max);
+                return categoryMatch && brandMatch && priceMatch;
+            });
 
-    const button = event.target;
-    button.textContent = "Agregado!";
-    button.disabled = true;
-    setTimeout(() => {
-      button.textContent = "Agregar al carrito";
-      button.disabled = false;
-    }, 1000);
-  }
+            currentPage = 1;
+            renderProducts();
+        }
 
-  // 🔹 Inicialización
-  document.addEventListener("DOMContentLoaded", function () {
-    const filterInputs = document.querySelectorAll(
-      '.filter-option input[type="checkbox"]'
-    );
-    filterInputs.forEach((input) => {
-      input.addEventListener("change", filterProducts);
-    });
+        async function addToCart(productId, event) {
+            if (!isAuthenticated()) {
+                if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Ir a iniciar sesión?')) {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+                return;
+            }
 
-    const topPriceFilter = document.getElementById("price-filter-top");
-    const sidebarPriceFilter = document.querySelector(
-      'input[value="0-1000000"]'
-    );
-    if (topPriceFilter && sidebarPriceFilter) {
-      topPriceFilter.addEventListener("change", function () {
-        sidebarPriceFilter.checked = this.checked;
-        filterProducts();
-      });
-    }
+            const button = event.target;
+            const originalText = button.textContent;
 
-    loadProducts();
-  });
+            try {
+                button.textContent = 'Agregando...';
+                button.disabled = true;
 
-  // Token de autenticación (deberías obtenerlo del login)
-function getAuthToken() {
-  return localStorage.getItem('authToken');
-}
+                const response = await fetch('http://localhost:3000/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify({ productId, quantity: 1 })
+                });
 
-// Versión mejorada de addToCart que usa el backend
-async function addToCart(productId, event) {
-  const token = getAuthToken();
-  
-  if (!token) {
-    alert('Debes iniciar sesión para agregar productos al carrito');
-    window.location.href = 'login.html'; // Página de login que debes crear
-    return;
-  }
+                const data = await response.json();
 
-  try {
-    const response = await fetch('http://localhost:3000/api/cart/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ productId, quantity: 1 })
-    });
+                if (!response.ok) {
+                    throw new Error(data.message || 'Error al agregar');
+                }
 
-    if (!response.ok) throw new Error('Error al agregar al carrito');
+                button.textContent = '✓ ¡Agregado!';
+                button.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                    button.style.background = '';
+                }, 2000);
 
-    const button = event.target;
-    button.textContent = '✓ Agregado!';
-    button.disabled = true;
-    button.style.backgroundColor = '#27ae60';
-    
-    setTimeout(() => {
-      button.textContent = 'Agregar al carrito';
-      button.disabled = false;
-      button.style.backgroundColor = '';
-    }, 2000);
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Error al agregar al carrito');
-  }
-}
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
 
-// Modificar renderProducts para incluir botón de detalles
-function renderProducts() {
-  const grid = document.getElementById("productsGrid");
-  if (!grid) return;
+        function logout() {
+            if (confirm('¿Cerrar sesión?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userData');
+                window.location.href = 'login.html';
+            }
+        }
 
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const endIndex = startIndex + productsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log('🚀 Inicializando');
+            updateAuthUI();
+            
+            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(input => {
+                input.addEventListener("change", filterProducts);
+            });
 
-  grid.innerHTML = currentProducts
-    .map(
-      (p) => `
-      <div class="producto">
-        <div class="product-image">🖥️</div>
-        <h3 class="product-name">${p.nombre}</h3>
-        <p>${p.descripcion}</p>
-        <div class="product-price">${formatPrice(p.precio)}</div>
-        <button class="view-details" onclick="window.location.href='producto-detalle.html?id=${p.id}'">
-          Ver detalles
-        </button>
-        <button class="add-to-cart" onclick="addToCart(${p.id}, event)">
-          Agregar al carrito
-        </button>
-      </div>`
-    )
-    .join("");
+            const topFilter = document.getElementById("price-filter-top");
+            const sideFilter = document.querySelector('input[value="0-1000000"]');
+            if (topFilter && sideFilter) {
+                topFilter.addEventListener("change", function () {
+                    sideFilter.checked = this.checked;
+                    filterProducts();
+                });
+            }
 
-  updatePagination();
-}
-</script>
-
-
+            loadProducts();
+        });
+    </script>
 </body>
 </html>

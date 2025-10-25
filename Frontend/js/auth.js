@@ -71,7 +71,7 @@ function saveAuthData(token, user) {
 }
 
 function getAuthToken() {
-    return localStorage.setItem('authToken');
+    return localStorage.getItem('authToken');
 }
 
 function getUserData() {
