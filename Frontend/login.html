@@ -8,20 +8,20 @@
 </head>
 <body>
     <header class="header">
-        <div class="nav-container container">
-            <div class="logo">
-                Mundo Pc 
-                <img src="Logo.png" alt="Mundo Pc">
-            </div>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="Index.html">Inicio</a></li>
-                    <li><a href="Productos.html">Productos</a></li>
-                    <li><a href="Carrito.html" class="cart">Carrito <span class="cart-icon" style="font-size: 1.5em; color: white; filter: brightness(0) invert(1); margin-left: 8px;">🛒</span></a></li>
-                </ul>
-            </nav>
+    <div class="nav-container container">
+        <div class="logo">
+            Mundo Pc 
+            <img src="Logo.png" alt="Mundo Pc">
         </div>
-    </header>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="Index.html">Inicio</a></li>
+                <li><a href="Productos.html">Productos</a></li>
+                <li><a href="Carrito.html" class="cart">Carrito 🛒</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
 
 
     <div class="auth-container">
@@ -208,5 +208,7 @@
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
         document.getElementById('registerForm').addEventListener('submit', handleRegister);
     </script>
+
+    <script src="js/navigation.js"></script>
 </body>
 </html>

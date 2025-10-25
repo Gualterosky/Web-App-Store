@@ -228,20 +228,21 @@
 </head>
 <body>
     <header class="header">
-        <div class="nav-container container">
-            <div class="logo">
-                Mundo PC 
-                <img src="Logo.png" alt="Mundo PC">
-            </div>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="Index.html">Inicio</a></li>
-                    <li><a href="Productos.html">Productos</a></li>
-                    <li><a href="Carrito.html" class="cart">Carrito 🛒</a></li>
-                </ul>
-            </nav>
+    <div class="nav-container container">
+        <div class="logo">
+            Mundo Pc 
+            <img src="Logo.png" alt="Mundo Pc">
         </div>
-    </header>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="Index.html">Inicio</a></li>
+                <li><a href="Productos.html">Productos</a></li>
+                <li><a href="Carrito.html" class="cart">Carrito 🛒</a></li>
+                <li id="authLink"><a href="login.html" style="color: #fff;">Iniciar Sesión</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
 
     <div id="loadingState" class="loading-container">
         <div class="spinner"></div>
@@ -490,5 +491,7 @@
             });
         });
     </script>
+
+    <script src="js/navigation.js"></script>
 </body>
 </html>
