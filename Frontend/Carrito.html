@@ -607,13 +607,32 @@
         }
     }
 
+    let promoDiscount = 0;
+    let appliedPromoCode = '';
+
     function applyPromo() {
         const code = document.getElementById('promoCode').value.trim();
         if (!code) {
-            alert('Ingresa un código promocional');
+            alert('❌ Por favor ingresa un código promocional');
             return;
         }
-        alert('Función de códigos promocionales próximamente');
+
+        // Generar descuento aleatorio entre 5% y 30%
+        const randomDiscount = Math.floor(Math.random() * 26) + 5; // 5 a 30
+        promoDiscount = randomDiscount;
+        appliedPromoCode = code;
+
+        // Actualizar el resumen con el descuento
+        updateSummary(cartData);
+
+        // Deshabilitar el input y botón
+        document.getElementById('promoCode').disabled = true;
+        document.querySelector('.promo-btn').disabled = true;
+        document.querySelector('.promo-btn').textContent = '✓ Aplicado';
+        document.querySelector('.promo-btn').style.background = '#27ae60';
+        document.querySelector('.promo-btn').style.color = 'white';
+
+        alert(`🎉 ¡Código "${code}" aplicado!\n💰 Descuento: ${randomDiscount}%`);
     }
 
     function proceedToCheckout() {
