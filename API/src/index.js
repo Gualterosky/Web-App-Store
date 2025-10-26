@@ -6,7 +6,8 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
-const cartRoutes = require('./routes/cartRoutes'); // ✨ NUEVO
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes'); // ✨ NUEVO
 
 const app = express();
 const PORT = 3000;
@@ -18,7 +19,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/services', serviceRoutes);
-app.use('/api/cart', cartRoutes); // ✨ NUEVO
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes); // ✨ NUEVO
 
 app.get('/', (req, res) => {
   res.send('🚀 Servidor funcionando correctamente');
