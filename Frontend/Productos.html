@@ -87,6 +87,12 @@
                     </div>
                 </div>
             </div>
+
+            <div class="filter-section">
+                <button onclick="clearAllFilters()" style="width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px;">
+                    🔄 Limpiar Filtros
+                </button>
+            </div>
         </aside>
 
         <main class="main-content">
@@ -96,6 +102,11 @@
                     <input type="checkbox" id="price-filter-top">
                     <label for="price-filter-top">$ 0 - $ 1.000.000</label>
                 </div>
+            </div>
+
+            <div id="activeFilters" style="display: none; margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2980b9;">
+                <strong style="color: #333;">Filtros activos:</strong>
+                <span id="activeFiltersText" style="color: #666; margin-left: 10px;"></span>
             </div>
 
             <div id="loadingMessage" style="text-align: center; padding: 40px; font-size: 18px; color: #666;">
@@ -168,7 +179,16 @@
 
                 document.getElementById("loadingMessage").style.display = "none";
                 document.getElementById("productsContainer").style.display = "block";
-                renderProducts();
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const categoria = urlParams.get('categoria');
+                
+                if (categoria) {
+                    filterProducts();
+                    updateActiveFiltersDisplay();
+                } else {
+                    renderProducts();
+                }
                 
             } catch (error) {
                 console.error("❌ Error:", error);
@@ -199,7 +219,7 @@
             const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
             if (currentProducts.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;"><h3>No se encontraron productos</h3></div>';
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;"><h3>No se encontraron productos con los filtros seleccionados</h3><p style="color: #666;">Intenta ajustar los filtros</p></div>';
                 return;
             }
 
@@ -275,6 +295,51 @@
 
             currentPage = 1;
             renderProducts();
+            updateActiveFiltersDisplay();
+        }
+
+        function updateActiveFiltersDisplay() {
+            const categoryFilters = Array.from(document.querySelectorAll('#categoryFilters input:checked'));
+            const brandFilters = Array.from(document.querySelectorAll('#brandFilters input:checked'));
+            const priceFilters = Array.from(document.querySelectorAll('.filter-section input[value*="-"]:checked'));
+
+            const activeFiltersDiv = document.getElementById('activeFilters');
+            const activeFiltersText = document.getElementById('activeFiltersText');
+
+            if (categoryFilters.length === 0 && brandFilters.length === 0 && priceFilters.length === 0) {
+                activeFiltersDiv.style.display = 'none';
+                return;
+            }
+
+            let filtersText = [];
+            
+            if (categoryFilters.length > 0) {
+                filtersText.push(`Categorías: ${categoryFilters.map(f => f.nextElementSibling.textContent).join(', ')}`);
+            }
+            
+            if (brandFilters.length > 0) {
+                filtersText.push(`Marcas: ${brandFilters.map(f => f.nextElementSibling.textContent).join(', ')}`);
+            }
+            
+            if (priceFilters.length > 0) {
+                filtersText.push(`Precios: ${priceFilters.map(f => f.nextElementSibling.textContent).join(', ')}`);
+            }
+
+            activeFiltersText.textContent = filtersText.join(' | ');
+            activeFiltersDiv.style.display = 'block';
+        }
+
+        function clearAllFilters() {
+            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+            });
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('categoria')) {
+                window.history.replaceState({}, '', 'Productos.html');
+            }
+            
+            filterProducts();
         }
 
         async function addToCart(productId, event) {
@@ -347,6 +412,17 @@
                     sideFilter.checked = this.checked;
                     filterProducts();
                 });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoria = urlParams.get('categoria');
+            
+            if (categoria) {
+                const categoryCheckbox = document.getElementById(`cat-${categoria}`);
+                if (categoryCheckbox) {
+                    categoryCheckbox.checked = true;
+                    console.log(`✅ Filtro de categoría "${categoria}" aplicado automáticamente`);
+                }
             }
 
             loadProducts();

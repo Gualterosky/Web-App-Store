@@ -1,9 +1,6 @@
-Nombre,Correo,Contrase�a,Estado
-Ana Torres,ana.torres@outlook.com,123456,No existe
-Carlos G.,carlos.g@hotmail.com,123456,No existe
-Luisa Martínez,luisa.martinez@outlook.com,123456,No existe
-Daniel Pérez,daniel.perez@yahoo.com,123456,No existe
-Sofía Rojas,sofia.rojas@gmail.com,Sr12345678,Activo
-Juan,juan@yahoo.com,12345678,No existe
-Kevin Leonardo,kevinleonardogm01@gmail.com,Kl12345678,Activo
-Admin,admin@mundopc.com,Admin123,Activo
+Nombre,Correo,Contrase�a
+Carlos G.,carlos.g@hotmail.com,Cg123456
+Sofía Rojas,sofia.rojas@gmail.com,Sr12345678
+Kevin Leonardo,kevinleonardogm01@gmail.com,Kl12345678
+Admin,admin@mundopc.com,Admin123
+Daniel Ricardo,elpatocuaquiti@gmai.com,Cuac_cuac1

@@ -40,7 +40,6 @@ const Cart = sequelize.define('Cart', {
   timestamps: true
 });
 
-// Relaciones
 Cart.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Cart.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 

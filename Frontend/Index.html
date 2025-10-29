@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mundo PC - Encuentra tu computadora ideal</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .loading-products {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .product-card {
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -35,22 +50,22 @@
         <section class="categories">
             <h2 class="section-title">Categorías</h2>
             <div class="grid grid-auto-fit">
-                <a href="index2.html">
+                <a href="Productos.html?categoria=escritorio">
                     <div class="card card-center category-card">
                     <span class="category-icon">🖥️</span>
                     <h3>Escritorio</h3>
                 </div></a>
-                <a href="index2.html">
+                <a href="Productos.html?categoria=portatil">
                 <div class="card card-center category-card">
                     <span class="category-icon">💻</span>
                     <h3>Portátil</h3>
                 </div></a>
-                <a href="index2.html">
+                <a href="Productos.html?categoria=componentes">
                 <div class="card card-center category-card">
                     <span class="category-icon">⚙️</span>
                     <h3>Componentes</h3>
                 </div></a>
-                <a href="index2.html">
+                <a href="Productos.html?categoria=perifericos">
                 <div class="card card-center category-card">
                     <span class="category-icon">🖨️</span>
                     <h3>Accesorios</h3>
@@ -60,64 +75,118 @@
 
         <section class="products">
            <h2 class="section-title">Productos destacados</h2>
-           <div class="grid grid-products">
-               <div class="card">
-                   <div class="product-image image-container"><img src="Escritorio 1.png" alt="Escritorio de computadora"></div>
-                   <h3 class="product-card h3">Escritorio</h3>
-                   <div class="product-price">$2.100.000</div>
-                   <a href="#" class="btn">Ver producto</a>
-               </div>
-               <div class="card">
-                   <div class="product-image image-container"><img src="Portatil.png" alt="Portátil"></div>
-                   <h3 class="product-card h3">Portátil</h3>
-                   <div class="product-price">$1.670.000</div>
-                   <a href="#" class="btn">Ver producto</a>
-               </div>
-               <div class="card">
-                   <div class="product-image image-container"><img src="Tarjeta_grafica.png" alt="Tarjeta gráfica"></div>
-                   <h3 class="product-card h3">Tarjeta gráfica</h3>
-                   <div class="product-price">$3.469.000</div>
-                   <a href="#" class="btn">Ver producto</a>
-               </div>
-               <div class="card">
-                   <div class="product-image image-container"><img src="Perifericos.png" alt="Periféricos"></div>
-                   <h3 class="product-card h3">Periféricos</h3>
-                   <div class="product-price">$130.000</div>
-                   <a href="#" class="btn">Ver producto</a>
-               </div>
+           
+           <div id="loadingProducts" class="loading-products">
+               🔄 Cargando productos destacados...
            </div>
+
+           <div id="productsGrid" class="grid grid-products" style="display: none;"></div>
         </section>
 
-        <section class="featured-product">
-            <div class="featured-image"><img src="Pc2.png" alt=""></div>
+        <section class="featured-product" id="featuredSection" style="display: none;">
+            <div class="featured-image" id="featuredImage">
+                <div style="font-size: 150px; display: flex; align-items: center; justify-content: center; height: 100%;">💻</div>
+            </div>
             <div class="featured-content">
-                <h2>Computadora de escritorio</h2>
-                <ul class="featured-specs">
-                    <li>Intel Core i5 Gen 12</li>
-                    <li>5.200 GHZ-FRECUENCIA TURBO</li>
-                    <li>Ram 16 GB</li>
-                    <li>SSD 1TB</li>
-                </ul>
-                <p class="featured-description">Ideal para actividad intensiva</p>
-                <p class="featured-ref">REF.71/4299+175/421</p>
-                <a href="index3.html"  class="btn">Ver producto</a>
+                <h2 id="featuredTitle">Producto destacado</h2>
+                <div id="featuredDescription" style="color: #666; margin: 20px 0;"></div>
+                <p class="featured-description" id="featuredCategory"></p>
+                <div style="font-size: 32px; color: #2980b9; font-weight: bold; margin: 20px 0;" id="featuredPrice"></div>
+                <a href="#" id="featuredLink" class="btn">Ver producto</a>
             </div>
         </section>
     </div>
 
     <script>
-        // Add some interactivity
+        const API_URL = "http://localhost:3000/api/products";
+
+        function formatPrice(price) {
+            return "$" + Math.round(price).toLocaleString("es-CO");
+        }
+
+        function getCategoryEmoji(categoria) {
+            const emojis = {
+                'escritorio': '🖥️',
+                'portatil': '💻',
+                'perifericos': '⌨️',
+                'componentes': '🔧'
+            };
+            return emojis[categoria?.toLowerCase()] || '💻';
+        }
+
+        async function loadFeaturedProducts() {
+            try {
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar productos');
+                }
+
+                const products = await response.json();
+                
+                if (products && products.length > 0) {
+                    displayFeaturedProducts(products);
+                    displayFeaturedProduct(products);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingProducts').innerHTML = '⚠️ Error al cargar productos';
+            }
+        }
+
+        function displayFeaturedProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            const featured = products.slice(0, 4);
+
+            grid.innerHTML = featured.map(product => `
+                <div class="card product-card">
+                    <div class="product-image image-container" style="font-size: 80px; height: 200px; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, #f0f0f0, #e8e8e8); border-radius: 15px;">
+                        ${getCategoryEmoji(product.categoria)}
+                    </div>
+                    <h3 class="product-card h3">${product.nombre.substring(0, 40)}${product.nombre.length > 40 ? '...' : ''}</h3>
+                    <div class="product-price">${formatPrice(product.precio)}</div>
+                    <a href="producto-detalle.html?id=${product.id}" class="btn">Ver producto</a>
+                </div>
+            `).join('');
+
+            document.getElementById('loadingProducts').style.display = 'none';
+            grid.style.display = 'grid';
+        }
+
+        function displayFeaturedProduct(products) {
+            const escritorios = products.filter(p => p.categoria?.toLowerCase() === 'escritorio');
+            
+            if (escritorios.length > 0) {
+                const featured = escritorios[0];
+                const section = document.getElementById('featuredSection');
+                
+                document.getElementById('featuredImage').innerHTML = `
+                    <div style="font-size: 150px; display: flex; align-items: center; justify-content: center; height: 100%;">
+                        ${getCategoryEmoji(featured.categoria)}
+                    </div>
+                `;
+                document.getElementById('featuredTitle').textContent = featured.nombre;
+                document.getElementById('featuredDescription').textContent = featured.descripcion || 'Producto de alta calidad';
+                document.getElementById('featuredCategory').textContent = `Categoría: ${featured.categoria}`;
+                document.getElementById('featuredPrice').textContent = formatPrice(featured.precio);
+                document.getElementById('featuredLink').href = `producto-detalle.html?id=${featured.id}`;
+                
+                section.style.display = 'grid';
+            }
+        }
+
         document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('click', function() {
-                // Simple click animation
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('a')) {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
             });
         });
 
-        // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -128,6 +197,10 @@
                     });
                 }
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFeaturedProducts();
         });
     </script>
 

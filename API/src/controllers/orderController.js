@@ -2,13 +2,11 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
-// Crear orden (procesar compra)
 exports.createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
     const { shippingInfo, paymentMethod } = req.body;
 
-    // Obtener items del carrito
     const cartItems = await Cart.findAll({
       where: { userId },
       include: [{
@@ -21,15 +19,12 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'El carrito está vacío' });
     }
 
-    // Calcular total
     const total = cartItems.reduce((sum, item) => {
       return sum + (item.product.precio * item.quantity);
     }, 0);
 
-    // Crear número de orden único
     const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    // Formatear items para guardar
     const orderItems = cartItems.map(item => ({
       productId: item.product.id,
       nombre: item.product.nombre,
@@ -39,7 +34,6 @@ exports.createOrder = async (req, res) => {
       marca: item.product.marca
     }));
 
-    // Crear orden
     const order = await Order.create({
       userId,
       orderNumber,
@@ -50,7 +44,6 @@ exports.createOrder = async (req, res) => {
       status: 'completado'
     });
 
-    // Vaciar carrito después de comprar
     await Cart.destroy({ where: { userId } });
 
     return res.status(201).json({
@@ -73,7 +66,6 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// Obtener historial de órdenes del usuario
 exports.getUserOrders = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -97,7 +89,6 @@ exports.getUserOrders = async (req, res) => {
   }
 };
 
-// Obtener detalle de una orden
 exports.getOrderById = async (req, res) => {
   try {
     const { id } = req.params;

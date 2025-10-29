@@ -1,6 +1,3 @@
-// seedProducts.js - Script para poblar la base de datos con productos
-// Coloca este archivo en: API/src/seedProducts.js
-
 const sequelize = require('./config/database');
 const Product = require('./models/Product');
 
@@ -225,7 +222,6 @@ async function seedDatabase() {
   }
 }
 
-// Ejecutar solo si se llama directamente
 if (require.main === module) {
   seedDatabase();
 }

@@ -375,13 +375,11 @@
             <p id="cartSubtitle">Cargando...</p>
         </div>
 
-        <!-- Loading State -->
         <div id="loadingState" class="loading-container">
             <div class="spinner"></div>
             <p style="color: #666;">Cargando tu carrito...</p>
         </div>
 
-        <!-- Empty Cart State -->
         <div id="emptyState" class="cart-items" style="display: none;">
             <div class="cart-empty">
                 <div class="cart-empty-icon">🛒</div>
@@ -393,7 +391,6 @@
             </div>
         </div>
 
-        <!-- Cart Content -->
         <div id="cartContent" class="cart-content" style="display: none;">
             <div class="cart-items">
                 <h2 style="font-size: 24px; color: #333; margin-bottom: 25px;">
@@ -510,7 +507,6 @@
                 displayCart(data);
             }
 
-            // ✨ Cargar historial siempre
             loadOrderHistory();
 
         } catch (error) {
@@ -617,15 +613,12 @@
             return;
         }
 
-        // Generar descuento aleatorio entre 5% y 30%
-        const randomDiscount = Math.floor(Math.random() * 26) + 5; // 5 a 30
+        const randomDiscount = Math.floor(Math.random() * 26) + 5;
         promoDiscount = randomDiscount;
         appliedPromoCode = code;
 
-        // Actualizar el resumen con el descuento
         updateSummary(cartData);
 
-        // Deshabilitar el input y botón
         document.getElementById('promoCode').disabled = true;
         document.querySelector('.promo-btn').disabled = true;
         document.querySelector('.promo-btn').textContent = '✓ Aplicado';
@@ -643,7 +636,6 @@
         window.location.href = 'checkout.html';
     }
 
-    // Cargar historial de compras
     async function loadOrderHistory() {
         try {
             const response = await fetch(`${API_URL}/orders`, {
@@ -799,7 +791,6 @@
         }
     }
 
-    // Inicializar
     document.addEventListener('DOMContentLoaded', () => {
         console.log('🚀 Inicializando carrito');
         loadCart();

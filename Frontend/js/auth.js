@@ -1,11 +1,4 @@
-// auth.js - Sistema de Autenticación para Mundo PC
-// ADAPTADO para usar 'correo' en lugar de 'email'
-
 const API_URL = "http://localhost:3000/api";
-
-// =============================================
-// UTILIDADES
-// =============================================
 
 function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
@@ -61,10 +54,6 @@ function setLoadingState(button, isLoading) {
     }
 }
 
-// =============================================
-// GESTIÓN DE TOKENS Y AUTENTICACIÓN
-// =============================================
-
 function saveAuthData(token, user) {
     localStorage.setItem('authToken', token);
     localStorage.setItem('userData', JSON.stringify(user));
@@ -101,20 +90,15 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// =============================================
-// MANEJO DE LOGIN
-// =============================================
-
 async function handleLogin(event) {
     event.preventDefault();
     
     const form = event.target;
     const submitBtn = form.querySelector('.submit-btn');
-    const correo = document.getElementById('loginEmail').value.trim(); // ADAPTADO
+    const correo = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe')?.checked;
     
-    // Validaciones básicas
     if (!correo || !password) {
         showError('Por favor completa todos los campos');
         return;
@@ -134,7 +118,7 @@ async function handleLogin(event) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ correo, password }) // ADAPTADO
+            body: JSON.stringify({ correo, password })
         });
         
         const data = await response.json();
@@ -143,12 +127,10 @@ async function handleLogin(event) {
             throw new Error(data.message || 'Error al iniciar sesión');
         }
         
-        // Guardar datos de autenticación
         saveAuthData(data.token, data.user);
         
         showSuccess('¡Inicio de sesión exitoso! Redirigiendo...');
         
-        // Redirigir después de 1 segundo
         setTimeout(() => {
             const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || 'Index.html';
             window.location.href = redirectUrl;
@@ -162,21 +144,16 @@ async function handleLogin(event) {
     }
 }
 
-// =============================================
-// MANEJO DE REGISTRO
-// =============================================
-
 async function handleRegister(event) {
     event.preventDefault();
     
     const form = event.target;
     const submitBtn = form.querySelector('.submit-btn');
     const nombre = document.getElementById('registerName').value.trim();
-    const correo = document.getElementById('registerEmail').value.trim(); // ADAPTADO
+    const correo = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('registerConfirmPassword').value;
     
-    // Validaciones
     if (!nombre || !correo || !password || !confirmPassword) {
         showError('Por favor completa todos los campos');
         return;
@@ -213,7 +190,7 @@ async function handleRegister(event) {
             },
             body: JSON.stringify({ 
                 nombre,
-                correo, // ADAPTADO
+                correo,
                 password 
             })
         });
@@ -224,7 +201,6 @@ async function handleRegister(event) {
             throw new Error(data.message || 'Error al crear la cuenta');
         }
         
-        // Auto-login después del registro (el backend ya devuelve el token)
         saveAuthData(data.token, data.user);
         
         showSuccess('¡Cuenta creada exitosamente! Redirigiendo...');
@@ -241,24 +217,15 @@ async function handleRegister(event) {
     }
 }
 
-// =============================================
-// VALIDACIONES
-// =============================================
-
 function isValidEmail(correo) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(correo);
 }
 
 function isStrongPassword(password) {
-    // Al menos 8 caracteres, una mayúscula, una minúscula y un número
     const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     return strongRegex.test(password);
 }
-
-// =============================================
-// FUNCIONES PARA CARRITO (con autenticación)
-// =============================================
 
 async function addToCartAPI(productId, quantity = 1) {
     const token = getAuthToken();
@@ -280,7 +247,6 @@ async function addToCartAPI(productId, quantity = 1) {
         });
         
         if (response.status === 401) {
-            // Token expirado o inválido
             clearAuthData();
             window.location.href = 'login.html';
             return null;
@@ -412,21 +378,15 @@ async function clearCart() {
     }
 }
 
-// =============================================
-// ACTUALIZACIÓN DE UI CON INFO DE USUARIO
-// =============================================
-
 function updateUIWithUserInfo() {
     const user = getUserData();
     
     if (user) {
-        // Actualizar elementos que muestren el nombre del usuario
         const userNameElements = document.querySelectorAll('.user-name');
         userNameElements.forEach(el => {
-            el.textContent = user.nombre || user.correo; // ADAPTADO
+            el.textContent = user.nombre || user.correo;
         });
         
-        // Mostrar/ocultar elementos según autenticación
         const authElements = document.querySelectorAll('.auth-only');
         authElements.forEach(el => {
             el.style.display = 'block';
@@ -439,15 +399,9 @@ function updateUIWithUserInfo() {
     }
 }
 
-// =============================================
-// INICIALIZACIÓN
-// =============================================
-
-// Ejecutar al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     updateUIWithUserInfo();
     
-    // Verificar si hay un formulario de login/registro
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     
@@ -459,13 +413,11 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', handleRegister);
     }
     
-    // Si el usuario ya está autenticado y está en la página de login
     if (isAuthenticated() && window.location.pathname.includes('login.html')) {
         window.location.href = 'Index.html';
     }
 });
 
-// Exportar funciones para uso global
 window.auth = {
     login: handleLogin,
     register: handleRegister,

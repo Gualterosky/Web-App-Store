@@ -1,19 +1,15 @@
-// navigation.js - Sistema de navegación compartido
 (function() {
     'use strict';
 
-    // Verificar si el usuario está autenticado
     function isAuthenticated() {
         return !!localStorage.getItem('authToken');
     }
 
-    // Obtener datos del usuario
     function getUserData() {
         const userData = localStorage.getItem('userData');
         return userData ? JSON.parse(userData) : null;
     }
 
-    // Actualizar UI de autenticación en el menú
     function updateAuthUI() {
         const authLink = document.getElementById('authLink');
         if (!authLink) return;
@@ -32,7 +28,6 @@
         }
     }
 
-    // Manejar cierre de sesión
     window.handleLogout = function(event) {
         if (event) event.preventDefault();
         
@@ -40,7 +35,6 @@
             localStorage.removeItem('authToken');
             localStorage.removeItem('userData');
             
-            // Redirigir según la página actual
             const currentPage = window.location.pathname;
             if (currentPage.includes('Carrito.html') || currentPage.includes('producto-detalle.html')) {
                 window.location.href = 'Index.html';
@@ -50,17 +44,14 @@
         }
     };
 
-    // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', updateAuthUI);
     } else {
         updateAuthUI();
     }
 
-    // Actualizar periódicamente (por si el usuario inicia sesión en otra pestaña)
     setInterval(updateAuthUI, 5000);
 
-    // Exportar funciones globales
     window.navigationAuth = {
         isAuthenticated,
         getUserData,

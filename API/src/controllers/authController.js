@@ -2,7 +2,6 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Login existente
 exports.login = async (req, res) => {
   try {
     const { correo, password } = req.body;
@@ -25,12 +24,10 @@ exports.login = async (req, res) => {
   }
 };
 
-// ✨ NUEVO: Registro de usuarios
 exports.register = async (req, res) => {
   try {
     const { nombre, correo, password } = req.body;
 
-    // Validaciones
     if (!nombre || !correo || !password) {
       return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
@@ -39,27 +36,22 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres' });
     }
 
-    // Verificar si el correo ya existe
     const existingUser = await User.findOne({ where: { correo } });
     if (existingUser) {
       return res.status(400).json({ message: 'El correo ya está registrado' });
     }
 
-    // Hashear contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
     const newUser = await User.create({
       nombre,
       correo,
       password: hashedPassword
     });
 
-    // Generar token
     const payload = { id: newUser.id, correo: newUser.correo };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' });
 
-    // Retornar datos sin contraseña
     const { password: _, ...userData } = newUser.toJSON();
 
     return res.status(201).json({ 
@@ -74,7 +66,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// Get Auth Info existente
 exports.getAuthInfo = async (req, res) => {
   if (!req.user) return res.status(401).json({ message: 'No autenticado' });
   return res.json({ user: req.user });

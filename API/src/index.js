@@ -7,7 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const cartRoutes = require('./routes/cartRoutes');
-const orderRoutes = require('./routes/orderRoutes'); // ✨ NUEVO
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 const PORT = 3000;
@@ -20,7 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes); // ✨ NUEVO
+app.use('/api/orders', orderRoutes);
 
 app.get('/', (req, res) => {
   res.send('🚀 Servidor funcionando correctamente');

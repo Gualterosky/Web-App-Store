@@ -1,7 +1,6 @@
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
-// Obtener carrito del usuario
 exports.getCart = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -16,7 +15,6 @@ exports.getCart = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    // Calcular total
     const total = cartItems.reduce((sum, item) => {
       return sum + (item.product.precio * item.quantity);
     }, 0);
@@ -35,7 +33,6 @@ exports.getCart = async (req, res) => {
   }
 };
 
-// Agregar producto al carrito
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -49,26 +46,22 @@ exports.addToCart = async (req, res) => {
       return res.status(400).json({ message: 'La cantidad debe ser mayor a 0' });
     }
 
-    // Verificar que el producto existe
     const product = await Product.findByPk(productId);
     if (!product) {
       return res.status(404).json({ message: 'Producto no encontrado' });
     }
 
-    // Verificar stock
     if (product.stock < quantity) {
       return res.status(400).json({ 
         message: `Stock insuficiente. Solo hay ${product.stock} unidades disponibles` 
       });
     }
 
-    // Verificar si ya existe en el carrito
     const existingItem = await Cart.findOne({
       where: { userId, productId }
     });
 
     if (existingItem) {
-      // Actualizar cantidad
       const newQuantity = existingItem.quantity + quantity;
       
       if (product.stock < newQuantity) {
@@ -94,7 +87,6 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    // Crear nuevo item en carrito
     const cartItem = await Cart.create({
       userId,
       productId,
@@ -123,7 +115,6 @@ exports.addToCart = async (req, res) => {
   }
 };
 
-// Actualizar cantidad de un item
 exports.updateCartItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -146,7 +137,6 @@ exports.updateCartItem = async (req, res) => {
       return res.status(404).json({ message: 'Item no encontrado en tu carrito' });
     }
 
-    // Verificar stock
     if (cartItem.product.stock < quantity) {
       return res.status(400).json({ 
         message: `Stock insuficiente. Solo hay ${cartItem.product.stock} unidades disponibles` 
@@ -178,7 +168,6 @@ exports.updateCartItem = async (req, res) => {
   }
 };
 
-// Eliminar item del carrito
 exports.removeFromCart = async (req, res) => {
   try {
     const { id } = req.params;
@@ -205,7 +194,6 @@ exports.removeFromCart = async (req, res) => {
   }
 };
 
-// Vaciar carrito
 exports.clearCart = async (req, res) => {
   try {
     const userId = req.user.id;

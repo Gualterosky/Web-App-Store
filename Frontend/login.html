@@ -42,7 +42,6 @@
             <div id="errorMessage" class="error-message"></div>
             <div id="successMessage" class="success-message"></div>
 
-            <!-- Formulario de Login -->
             <form id="loginForm" class="auth-form active">
                 <div class="form-group">
                     <label for="loginEmail">Correo electrónico</label>
@@ -90,7 +89,6 @@
                 </button>
             </form>
 
-            <!-- Formulario de Registro -->
             <form id="registerForm" class="auth-form">
                 <div class="form-group">
                     <label for="registerName">Nombre completo</label>
@@ -166,13 +164,11 @@
     <script src="js/auth.js"></script>
     <script>
         function switchTab(tab) {
-            // Actualizar botones
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
 
-            // Actualizar formularios
             document.querySelectorAll('.auth-form').forEach(form => {
                 form.classList.remove('active');
             });
@@ -183,7 +179,6 @@
                 document.getElementById('registerForm').classList.add('active');
             }
 
-            // Limpiar mensajes
             hideMessages();
         }
 
@@ -204,7 +199,6 @@
             showError(`Login con ${provider} no implementado aún`);
         }
 
-        // Event Listeners
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
         document.getElementById('registerForm').addEventListener('submit', handleRegister);
     </script>
