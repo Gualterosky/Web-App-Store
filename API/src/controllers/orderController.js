@@ -5,7 +5,7 @@ const Product = require('../models/Product');
 exports.createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { shippingInfo, paymentMethod } = req.body;
+    const { shippingInfo, paymentMethod, promoCode, discount } = req.body;
 
     const cartItems = await Cart.findAll({
       where: { userId },
@@ -19,9 +19,16 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'El carrito está vacío' });
     }
 
-    const total = cartItems.reduce((sum, item) => {
+    let subtotal = cartItems.reduce((sum, item) => {
       return sum + (item.product.precio * item.quantity);
     }, 0);
+
+    let discountAmount = 0;
+    if (discount && discount > 0 && discount <= 100) {
+      discountAmount = subtotal * (discount / 100);
+    }
+
+    const total = subtotal - discountAmount;
 
     const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
@@ -38,6 +45,10 @@ exports.createOrder = async (req, res) => {
       userId,
       orderNumber,
       total,
+      subtotal,
+      discount: discount || 0,
+      discountAmount,
+      promoCode: promoCode || null,
       shippingInfo,
       paymentMethod,
       items: orderItems,
@@ -51,6 +62,10 @@ exports.createOrder = async (req, res) => {
       order: {
         id: order.id,
         orderNumber: order.orderNumber,
+        subtotal: order.subtotal,
+        discount: order.discount,
+        discountAmount: order.discountAmount,
+        promoCode: order.promoCode,
         total: order.total,
         items: order.items,
         createdAt: order.createdAt

@@ -513,12 +513,53 @@
             document.getElementById('summaryItems').innerHTML = itemsHTML;
 
             const subtotal = data.total;
-            const tax = subtotal * 0.19;
-            const total = subtotal + tax;
+            
+            const savedPromo = localStorage.getItem('appliedPromo');
+            let discount = 0;
+            let discountAmount = 0;
 
-            document.getElementById('subtotalAmount').textContent = formatPrice(subtotal);
-            document.getElementById('taxAmount').textContent = formatPrice(tax);
-            document.getElementById('totalAmount').textContent = formatPrice(total);
+            if (savedPromo) {
+                const promoData = JSON.parse(savedPromo);
+                discount = promoData.discount;
+                discountAmount = subtotal * (discount / 100);
+            }
+
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const tax = subtotalAfterDiscount * 0.19;
+            const total = subtotalAfterDiscount + tax;
+
+            let summaryHTML = `
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotalAmount">${formatPrice(subtotal)}</span>
+                </div>
+            `;
+
+            if (discount > 0) {
+                summaryHTML += `
+                    <div class="summary-row" style="color: #27ae60;">
+                        <span>Descuento (${discount}%):</span>
+                        <span>-${formatPrice(discountAmount)}</span>
+                    </div>
+                `;
+            }
+
+            summaryHTML += `
+                <div class="summary-row">
+                    <span>Envío:</span>
+                    <span>Gratis</span>
+                </div>
+                <div class="summary-row">
+                    <span>IVA (19%):</span>
+                    <span id="taxAmount">${formatPrice(tax)}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="totalAmount">${formatPrice(total)}</span>
+                </div>
+            `;
+
+            document.querySelector('.summary-total').innerHTML = summaryHTML;
         }
 
         async function placeOrder() {
@@ -537,6 +578,16 @@
                 postalCode: document.getElementById('postalCode').value
             };
 
+            const savedPromo = localStorage.getItem('appliedPromo');
+            let promoCode = null;
+            let discount = 0;
+
+            if (savedPromo) {
+                const promoData = JSON.parse(savedPromo);
+                promoCode = promoData.code;
+                discount = promoData.discount;
+            }
+
             const button = document.getElementById('placeOrderBtn');
             button.disabled = true;
             button.textContent = '⏳ Procesando...';
@@ -550,7 +601,9 @@
                     },
                     body: JSON.stringify({
                         shippingInfo,
-                        paymentMethod: selectedPaymentMethod
+                        paymentMethod: selectedPaymentMethod,
+                        promoCode,
+                        discount
                     })
                 });
 
@@ -558,7 +611,15 @@
 
                 if (!response.ok) throw new Error(data.message);
 
-                alert(`✅ ¡Compra realizada exitosamente!\n\nNúmero de orden: ${data.order.orderNumber}\nTotal: ${formatPrice(data.order.total)}`);
+                localStorage.removeItem('appliedPromo');
+
+                let message = `✅ ¡Compra realizada exitosamente!\n\nNúmero de orden: ${data.order.orderNumber}\nTotal: ${formatPrice(data.order.total)}`;
+                
+                if (data.order.promoCode) {
+                    message += `\n🎉 Descuento aplicado: ${data.order.discount}%\n💰 Ahorraste: ${formatPrice(data.order.discountAmount)}`;
+                }
+
+                alert(message);
                 window.location.href = 'Carrito.html';
 
             } catch (error) {

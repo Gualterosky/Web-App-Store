@@ -198,6 +198,11 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
+        .summary-row.discount {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
         .summary-row.total {
             border-bottom: none;
             border-top: 2px solid #f0f0f0;
@@ -407,6 +412,11 @@
                     <span class="summary-value" id="subtotal">$0</span>
                 </div>
                 
+                <div class="summary-row" id="discountRow" style="display: none;">
+                    <span class="summary-label" style="color: #27ae60;">Descuento (<span id="discountPercent">0</span>%)</span>
+                    <span class="summary-value" style="color: #27ae60;" id="discountAmount">-$0</span>
+                </div>
+                
                 <div class="summary-row">
                     <span class="summary-label">Envío</span>
                     <span class="summary-value" id="shipping">Gratis</span>
@@ -446,6 +456,8 @@
     <script>
     const API_URL = "http://localhost:3000/api";
     let cartData = null;
+    let promoDiscount = 0;
+    let appliedPromoCode = '';
 
     function isAuthenticated() {
         return !!localStorage.getItem('authToken');
@@ -505,6 +517,7 @@
                 showEmptyCart();
             } else {
                 displayCart(data);
+                loadSavedPromo();
             }
 
             loadOrderHistory();
@@ -516,9 +529,28 @@
         }
     }
 
+    function loadSavedPromo() {
+        const savedPromo = localStorage.getItem('appliedPromo');
+        if (savedPromo) {
+            const promoData = JSON.parse(savedPromo);
+            appliedPromoCode = promoData.code;
+            promoDiscount = promoData.discount;
+            
+            document.getElementById('promoCode').value = appliedPromoCode;
+            document.getElementById('promoCode').disabled = true;
+            document.querySelector('.promo-btn').disabled = true;
+            document.querySelector('.promo-btn').textContent = '✓ Aplicado';
+            document.querySelector('.promo-btn').style.background = '#27ae60';
+            document.querySelector('.promo-btn').style.color = 'white';
+            
+            updateSummary(cartData);
+        }
+    }
+
     function showEmptyCart() {
         document.getElementById('emptyState').style.display = 'block';
         document.getElementById('cartSubtitle').textContent = 'No tienes productos en tu carrito';
+        localStorage.removeItem('appliedPromo');
     }
 
     function displayCart(data) {
@@ -552,11 +584,22 @@
 
     function updateSummary(data) {
         const subtotal = data.total;
-        const tax = subtotal * 0.19;
-        const total = subtotal + tax;
+        const discountAmount = subtotal * (promoDiscount / 100);
+        const subtotalAfterDiscount = subtotal - discountAmount;
+        const tax = subtotalAfterDiscount * 0.19;
+        const total = subtotalAfterDiscount + tax;
 
         document.getElementById('itemCount').textContent = data.count;
         document.getElementById('subtotal').textContent = formatPrice(subtotal);
+        
+        if (promoDiscount > 0) {
+            document.getElementById('discountRow').style.display = 'flex';
+            document.getElementById('discountPercent').textContent = promoDiscount;
+            document.getElementById('discountAmount').textContent = '-' + formatPrice(discountAmount);
+        } else {
+            document.getElementById('discountRow').style.display = 'none';
+        }
+        
         document.getElementById('tax').textContent = formatPrice(tax);
         document.getElementById('total').textContent = formatPrice(total);
     }
@@ -603,9 +646,6 @@
         }
     }
 
-    let promoDiscount = 0;
-    let appliedPromoCode = '';
-
     function applyPromo() {
         const code = document.getElementById('promoCode').value.trim();
         if (!code) {
@@ -616,6 +656,11 @@
         const randomDiscount = Math.floor(Math.random() * 26) + 5;
         promoDiscount = randomDiscount;
         appliedPromoCode = code;
+
+        localStorage.setItem('appliedPromo', JSON.stringify({
+            code: appliedPromoCode,
+            discount: promoDiscount
+        }));
 
         updateSummary(cartData);
 
@@ -702,12 +747,22 @@
                                         💳 ${order.paymentMethod === 'card' ? 'Tarjeta de Crédito' : 
                                              order.paymentMethod === 'pse' ? 'PSE' : 'Efectivo'}
                                     </p>
+                                    ${order.promoCode ? `
+                                    <p style="color: #27ae60; font-size: 14px; margin: 5px 0 0 0;">
+                                        🎟️ Código: ${order.promoCode} (-${order.discount}%)
+                                    </p>
+                                    ` : ''}
                                 </div>
                                 <div style="text-align: right;">
                                     <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Total pagado</div>
                                     <div style="font-size: 28px; color: #2980b9; font-weight: bold;">
                                         ${formatPrice(order.total)}
                                     </div>
+                                    ${order.discountAmount > 0 ? `
+                                    <div style="font-size: 12px; color: #27ae60; margin-top: 5px;">
+                                        Ahorraste: ${formatPrice(order.discountAmount)}
+                                    </div>
+                                    ` : ''}
                                 </div>
                             </div>
 
